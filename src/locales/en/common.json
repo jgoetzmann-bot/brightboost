@@ -1782,6 +1782,87 @@
       "movesLabel": "Moves",
       "controlsHint": "Arrow keys to move • Space to wait"
     },
+    "dataDash": {
+      "title": "Data Dash: Sort & Discover",
+      "briefingStory": "Your greenhouse team sent a data drop. Sort plant cards, infer hidden rules, and use chart evidence to support a claim.",
+      "chapterLabel": "Life Science Data",
+      "tipOneAttribute": "Use one attribute per sort rule",
+      "tipGroupShare": "Look for what all cards in a group share",
+      "tipChartEvidence": "Use chart counts as evidence",
+      "controlsKeyboard": "Use Tab to select a card, then choose a bin or answer with Enter or Space.",
+      "controlsSelect": "Select a card, then choose a bin or answer.",
+      "controlsEvidence": "Use attributes as evidence.",
+      "phaseA": "Phase A: Sort by Attribute",
+      "phaseB": "Phase B: Infer the Rule",
+      "phaseC": "Phase C: Read the Chart",
+      "sortRuleLead": "Rule: Sort all cards by",
+      "cardDetails": "Bed {{bed}} • Sun: {{sun}} • Water: {{water}} • Leaf: {{leaf}} • Seed: {{seed}} • Growth: {{growth}}",
+      "assignedBin": "Assigned bin:",
+      "placeInBin": "Place in \"{{value}}\" bin",
+      "hint": "Hint",
+      "submitPhaseA": "Submit Phase A",
+      "submitPhaseB": "Submit Phase B",
+      "completeMission": "Complete Mission",
+      "inferPrompt": "Scientists grouped these cards with a hidden rule. Which attribute did they use?",
+      "groupLabel": "Group {{group}}",
+      "chartIntro": "Chart from your Phase A sort ({{rule}}):",
+      "chartRow": "{{value}}: {{count}}",
+      "attributes": {
+        "sunlightNeed": "Sunlight need",
+        "waterNeed": "Water need",
+        "leafType": "Leaf type",
+        "seedType": "Seed type",
+        "growthSpeed": "Growth speed"
+      },
+      "values": {
+        "sunlightNeed": {
+          "full": "full",
+          "partial": "partial",
+          "shade": "shade"
+        },
+        "waterNeed": {
+          "low": "low",
+          "medium": "medium",
+          "high": "high"
+        },
+        "leafType": {
+          "broad": "broad",
+          "needle": "needle",
+          "frond": "frond"
+        },
+        "seedType": {
+          "pod": "pod",
+          "cone": "cone",
+          "spore": "spore"
+        },
+        "growthSpeed": {
+          "slow": "slow",
+          "medium": "medium",
+          "fast": "fast"
+        }
+      },
+      "plants": {
+        "bean": "Bean",
+        "fern": "Fern",
+        "pine": "Pine",
+        "pea": "Pea",
+        "moss": "Moss",
+        "spruce": "Spruce",
+        "sunflower": "Sunflower",
+        "hosta": "Hosta"
+      },
+      "chart": {
+        "claimPrompt": "Which claim is best supported by the chart?",
+        "claimFullSun": "Most plants need full sunlight.",
+        "claimShade": "Most plants need shade.",
+        "claimPartialSun": "All plants need partial sunlight.",
+        "evidencePrompt": "What evidence best supports your claim?",
+        "evidenceFullSunBar": "The full-sun bar is tallest.",
+        "evidenceFernFronds": "Fern has frond leaves.",
+        "evidenceBedA": "Plant bed A has three cards.",
+        "mostPlantsPrompt": "Which \"{{rule}}\" group has the most plants?"
+      }
+    },
     "moveMeasure": {
       "title": "Move, Measure & Improve",
       "chapterLabel": "Body Lab",

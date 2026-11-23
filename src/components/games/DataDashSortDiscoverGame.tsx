@@ -1,13 +1,25 @@
 import { useMemo, useState } from "react";
-import GameShell, { type GameResult, type MissionBriefing } from "./shared/GameShell";
-import { resolveChallenge, type ResolvedChallenge } from "./dataDashAuthoring";
+import { useTranslation } from "react-i18next";
+import GameShell, {
+  type GameResult,
+  type MissionBriefing,
+} from "./shared/GameShell";
+import {
+  ATTR_LABELS,
+  resolveChallenge,
+  type ResolvedChallenge,
+} from "./dataDashAuthoring";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type GameProps = {
   config?: any;
   onComplete?: (result: GameResult) => void;
-  secondaryAction?: { label: string; icon?: React.ReactNode; onClick: () => void };
+  secondaryAction?: {
+    label: string;
+    icon?: React.ReactNode;
+    onClick: () => void;
+  };
 };
 
 export type DataCard = {
@@ -24,44 +36,154 @@ export type DataCard = {
 export type SortRuleKey = "sunlightNeed" | "waterNeed" | "leafType";
 
 export const DATA_DASH_CARDS: DataCard[] = [
-  { id: "bean", name: "Bean", plantBed: "A", sunlightNeed: "full", waterNeed: "medium", leafType: "broad", seedType: "pod", growthSpeed: "fast" },
-  { id: "fern", name: "Fern", plantBed: "B", sunlightNeed: "shade", waterNeed: "high", leafType: "frond", seedType: "spore", growthSpeed: "medium" },
-  { id: "pine", name: "Pine", plantBed: "C", sunlightNeed: "full", waterNeed: "low", leafType: "needle", seedType: "cone", growthSpeed: "slow" },
-  { id: "pea", name: "Pea", plantBed: "A", sunlightNeed: "full", waterNeed: "medium", leafType: "broad", seedType: "pod", growthSpeed: "fast" },
-  { id: "moss", name: "Moss", plantBed: "B", sunlightNeed: "shade", waterNeed: "high", leafType: "frond", seedType: "spore", growthSpeed: "slow" },
-  { id: "spruce", name: "Spruce", plantBed: "C", sunlightNeed: "partial", waterNeed: "low", leafType: "needle", seedType: "cone", growthSpeed: "medium" },
-  { id: "sunflower", name: "Sunflower", plantBed: "A", sunlightNeed: "full", waterNeed: "medium", leafType: "broad", seedType: "pod", growthSpeed: "fast" },
-  { id: "hosta", name: "Hosta", plantBed: "B", sunlightNeed: "shade", waterNeed: "high", leafType: "broad", seedType: "pod", growthSpeed: "medium" },
+  {
+    id: "bean",
+    name: "Bean",
+    plantBed: "A",
+    sunlightNeed: "full",
+    waterNeed: "medium",
+    leafType: "broad",
+    seedType: "pod",
+    growthSpeed: "fast",
+  },
+  {
+    id: "fern",
+    name: "Fern",
+    plantBed: "B",
+    sunlightNeed: "shade",
+    waterNeed: "high",
+    leafType: "frond",
+    seedType: "spore",
+    growthSpeed: "medium",
+  },
+  {
+    id: "pine",
+    name: "Pine",
+    plantBed: "C",
+    sunlightNeed: "full",
+    waterNeed: "low",
+    leafType: "needle",
+    seedType: "cone",
+    growthSpeed: "slow",
+  },
+  {
+    id: "pea",
+    name: "Pea",
+    plantBed: "A",
+    sunlightNeed: "full",
+    waterNeed: "medium",
+    leafType: "broad",
+    seedType: "pod",
+    growthSpeed: "fast",
+  },
+  {
+    id: "moss",
+    name: "Moss",
+    plantBed: "B",
+    sunlightNeed: "shade",
+    waterNeed: "high",
+    leafType: "frond",
+    seedType: "spore",
+    growthSpeed: "slow",
+  },
+  {
+    id: "spruce",
+    name: "Spruce",
+    plantBed: "C",
+    sunlightNeed: "partial",
+    waterNeed: "low",
+    leafType: "needle",
+    seedType: "cone",
+    growthSpeed: "medium",
+  },
+  {
+    id: "sunflower",
+    name: "Sunflower",
+    plantBed: "A",
+    sunlightNeed: "full",
+    waterNeed: "medium",
+    leafType: "broad",
+    seedType: "pod",
+    growthSpeed: "fast",
+  },
+  {
+    id: "hosta",
+    name: "Hosta",
+    plantBed: "B",
+    sunlightNeed: "shade",
+    waterNeed: "high",
+    leafType: "broad",
+    seedType: "pod",
+    growthSpeed: "medium",
+  },
 ];
 
-export const SORT_RULES: Record<SortRuleKey, { label: string; values: string[] }> = {
-  sunlightNeed: { label: "Sunlight need", values: ["full", "partial", "shade"] },
+export const SORT_RULES: Record<
+  SortRuleKey,
+  { label: string; values: string[] }
+> = {
+  sunlightNeed: {
+    label: "Sunlight need",
+    values: ["full", "partial", "shade"],
+  },
   waterNeed: { label: "Water need", values: ["low", "medium", "high"] },
   leafType: { label: "Leaf type", values: ["broad", "needle", "frond"] },
 };
 
-export function evaluateSortAssignment(cards: DataCard[], assignments: Record<string, string>, rule: SortRuleKey) {
-  const correct = cards.filter((card) => assignments[card.id] === card[rule]).length;
+export function evaluateSortAssignment(
+  cards: DataCard[],
+  assignments: Record<string, string>,
+  rule: SortRuleKey,
+) {
+  const correct = cards.filter(
+    (card) => assignments[card.id] === card[rule],
+  ).length;
   return { correct, total: cards.length };
 }
 
 export function buildChartCounts(cards: DataCard[], rule: SortRuleKey) {
-  return SORT_RULES[rule].values.map((value) => ({ label: value, count: cards.filter((card) => card[rule] === value).length }));
+  return SORT_RULES[rule].values.map((value) => ({
+    label: value,
+    count: cards.filter((card) => card[rule] === value).length,
+  }));
 }
 
-export function checkChartAnswer(correctIndex: number, selectedIndex: number | null) {
+export function checkChartAnswer(
+  correctIndex: number,
+  selectedIndex: number | null,
+) {
   return selectedIndex === correctIndex;
 }
 
-export function calculateDataDashScore(input: { sortCorrect: number; sortTotal: number; inferredRuleCorrect: boolean; chartCorrect: number; chartTotal: number; hintsUsed: number }) {
+export function calculateDataDashScore(input: {
+  sortCorrect: number;
+  sortTotal: number;
+  inferredRuleCorrect: boolean;
+  chartCorrect: number;
+  chartTotal: number;
+  hintsUsed: number;
+}) {
   const total = input.sortTotal + 1 + input.chartTotal;
-  const score = input.sortCorrect + (input.inferredRuleCorrect ? 1 : 0) + input.chartCorrect;
+  const score =
+    input.sortCorrect +
+    (input.inferredRuleCorrect ? 1 : 0) +
+    input.chartCorrect;
   const accuracy = Math.round((score / total) * 100);
-  const evidenceScore = Math.round((input.chartCorrect / input.chartTotal) * 100);
+  const evidenceScore = Math.round(
+    (input.chartCorrect / input.chartTotal) * 100,
+  );
   return { score, total, accuracy, evidenceScore };
 }
 
-export function buildCompletionPayload(input: { sortCorrect: number; sortTotal: number; inferredRuleCorrect: boolean; chartCorrect: number; chartTotal: number; hintsUsed: number; roundsCompleted: number }) {
+export function buildCompletionPayload(input: {
+  sortCorrect: number;
+  sortTotal: number;
+  inferredRuleCorrect: boolean;
+  chartCorrect: number;
+  chartTotal: number;
+  hintsUsed: number;
+  roundsCompleted: number;
+}) {
   const calc = calculateDataDashScore(input);
   return {
     gameKey: "data_dash_sort_discover",
@@ -75,19 +197,6 @@ export function buildCompletionPayload(input: { sortCorrect: number; sortTotal: 
   };
 }
 
-const BRIEFING: MissionBriefing = {
-  title: "Data Dash: Sort & Discover",
-  story: "Your greenhouse team sent a data drop. Sort plant cards, infer hidden rules, and use chart evidence to support a claim.",
-  icon: "📊",
-  tips: ["Use one attribute per sort rule", "Look for what all cards in a group share", "Use chart counts as evidence"],
-  chapterLabel: "Life Science Data",
-  themeColor: "emerald",
-  controlInstructions: {
-    keyboard: ["Use Tab to select a card, then choose a bin or answer with Enter or Space."],
-    buttons: ["Select a card, then choose a bin or answer.", "Use attributes as evidence."],
-  },
-};
-
 function DataDashPlayfield({
   challenge,
   onFinish,
@@ -95,15 +204,40 @@ function DataDashPlayfield({
   challenge: ResolvedChallenge;
   onFinish: (result: GameResult) => void;
 }) {
+  const { t } = useTranslation();
   // Cards/rules come from the resolved challenge (authored or default).
-  const { cards, sortRule: rule, inferRule, inferOptions, chartQuestions } = challenge;
+  const {
+    cards,
+    sortRule: rule,
+    inferRule,
+    inferOptions,
+    chartQuestions,
+  } = challenge;
   const inferAttr = inferRule as keyof DataCard;
+
+  // Display only: assignments, scoring and React keys keep the raw card ids,
+  // attribute keys and values. The English defaults come from the data itself.
+  // ATTR_LABELS is read at render time, never at module eval, because of the
+  // import cycle with dataDashAuthoring.ts (see pool() there).
+  const attrLabel = (attr: string) =>
+    t(`games.dataDash.attributes.${attr}`, {
+      defaultValue: ATTR_LABELS[attr] ?? attr,
+    });
+  const valueLabel = (attr: string, value: string) =>
+    t(`games.dataDash.values.${attr}.${value}`, { defaultValue: value });
+  const plantName = (card: DataCard) =>
+    t(`games.dataDash.plants.${card.id}`, { defaultValue: card.name });
+  const ruleLabel = attrLabel(rule);
+  const hintLabel = t("games.dataDash.hint", { defaultValue: "Hint" });
 
   const [phase, setPhase] = useState<"sort" | "infer" | "chart">("sort");
   const [assignments, setAssignments] = useState<Record<string, string>>({});
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   const [hintsUsed, setHintsUsed] = useState(0);
-  const [sortResult, setSortResult] = useState<{ correct: number; total: number } | null>(null);
+  const [sortResult, setSortResult] = useState<{
+    correct: number;
+    total: number;
+  } | null>(null);
 
   const [inferChoice, setInferChoice] = useState<string | null>(null);
 
@@ -128,7 +262,9 @@ function DataDashPlayfield({
   };
 
   const finishGame = () => {
-    const chartCorrect = chartQuestions.filter((q, i) => checkChartAnswer(q.answerIndex, chartAnswers[i] ?? null)).length;
+    const chartCorrect = chartQuestions.filter((q, i) =>
+      checkChartAnswer(q.answerIndex, chartAnswers[i] ?? null),
+    ).length;
     const payload = buildCompletionPayload({
       sortCorrect: sortResult?.correct ?? 0,
       sortTotal: sortResult?.total ?? cards.length,
@@ -142,83 +278,227 @@ function DataDashPlayfield({
     onFinish(payload as GameResult);
   };
 
+  const phaseTitle =
+    phase === "sort"
+      ? t("games.dataDash.phaseA", {
+          defaultValue: "Phase A: Sort by Attribute",
+        })
+      : phase === "infer"
+        ? t("games.dataDash.phaseB", {
+            defaultValue: "Phase B: Infer the Rule",
+          })
+        : t("games.dataDash.phaseC", {
+            defaultValue: "Phase C: Read the Chart",
+          });
+
   return (
     <div className="max-w-5xl mx-auto space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>Phase {phase === "sort" ? "A" : phase === "infer" ? "B" : "C"}: {phase === "sort" ? "Sort by Attribute" : phase === "infer" ? "Infer the Rule" : "Read the Chart"}</CardTitle>
+          <CardTitle>{phaseTitle}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {phase === "sort" && (
             <>
-              <p className="text-sm text-slate-600">Rule: Sort all cards by <strong>{SORT_RULES[rule].label}</strong>.</p>
+              <p className="text-sm text-slate-600">
+                {t("games.dataDash.sortRuleLead", {
+                  defaultValue: "Rule: Sort all cards by",
+                })}{" "}
+                <strong>{ruleLabel}</strong>.
+              </p>
               <div className="grid md:grid-cols-2 gap-3">
                 {cards.map((card) => (
-                  <button key={card.id} className={`border rounded-lg p-2 text-left ${selectedCard === card.id ? "border-emerald-500" : "border-slate-200"}`} onClick={() => setSelectedCard(card.id)}>
-                    <div className="font-semibold">{card.name}</div>
-                    <div className="text-xs text-slate-500">Bed {card.plantBed} • Sun: {card.sunlightNeed} • Water: {card.waterNeed} • Leaf: {card.leafType} • Seed: {card.seedType} • Growth: {card.growthSpeed}</div>
-                    <div className="text-xs mt-1">Assigned bin: <strong>{assignments[card.id] ?? "—"}</strong></div>
+                  <button
+                    key={card.id}
+                    className={`border rounded-lg p-2 text-left ${selectedCard === card.id ? "border-emerald-500" : "border-slate-200"}`}
+                    onClick={() => setSelectedCard(card.id)}
+                  >
+                    <div className="font-semibold">{plantName(card)}</div>
+                    <div className="text-xs text-slate-500">
+                      {t("games.dataDash.cardDetails", {
+                        bed: card.plantBed,
+                        sun: valueLabel("sunlightNeed", card.sunlightNeed),
+                        water: valueLabel("waterNeed", card.waterNeed),
+                        leaf: valueLabel("leafType", card.leafType),
+                        seed: valueLabel("seedType", card.seedType),
+                        growth: valueLabel("growthSpeed", card.growthSpeed),
+                        defaultValue:
+                          "Bed {{bed}} • Sun: {{sun}} • Water: {{water}} • Leaf: {{leaf}} • Seed: {{seed}} • Growth: {{growth}}",
+                      })}
+                    </div>
+                    <div className="text-xs mt-1">
+                      {t("games.dataDash.assignedBin", {
+                        defaultValue: "Assigned bin:",
+                      })}{" "}
+                      <strong>
+                        {assignments[card.id] === undefined
+                          ? "—"
+                          : valueLabel(rule, assignments[card.id])}
+                      </strong>
+                    </div>
                   </button>
                 ))}
               </div>
               <div className="flex flex-wrap gap-2">
                 {SORT_RULES[rule].values.map((value) => (
-                  <Button key={value} variant="outline" onClick={() => selectedCard && setAssignments((prev) => ({ ...prev, [selectedCard]: value }))} disabled={!selectedCard}>
-                    Place in "{value}" bin
+                  <Button
+                    key={value}
+                    variant="outline"
+                    onClick={() =>
+                      selectedCard &&
+                      setAssignments((prev) => ({
+                        ...prev,
+                        [selectedCard]: value,
+                      }))
+                    }
+                    disabled={!selectedCard}
+                  >
+                    {t("games.dataDash.placeInBin", {
+                      value: valueLabel(rule, value),
+                      defaultValue: 'Place in "{{value}}" bin',
+                    })}
                   </Button>
                 ))}
-                <Button variant="secondary" onClick={() => setHintsUsed((v) => v + 1)}>Hint</Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => setHintsUsed((v) => v + 1)}
+                >
+                  {hintLabel}
+                </Button>
               </div>
-              <Button disabled={!allSorted} onClick={submitSort}>Submit Phase A</Button>
+              <Button disabled={!allSorted} onClick={submitSort}>
+                {t("games.dataDash.submitPhaseA", {
+                  defaultValue: "Submit Phase A",
+                })}
+              </Button>
             </>
           )}
 
           {phase === "infer" && (
             <>
-              <p className="text-sm text-slate-600">Scientists grouped these cards with a hidden rule. Which attribute did they use?</p>
+              <p className="text-sm text-slate-600">
+                {t("games.dataDash.inferPrompt", {
+                  defaultValue:
+                    "Scientists grouped these cards with a hidden rule. Which attribute did they use?",
+                })}
+              </p>
               <div className="grid md:grid-cols-3 gap-3">
                 {groupedForInfer.map((group) => (
-                  <div key={group.label} className="border rounded-lg p-3 bg-slate-50">
-                    <div className="font-semibold mb-2">Group {group.label}</div>
+                  <div
+                    key={group.label}
+                    className="border rounded-lg p-3 bg-slate-50"
+                  >
+                    <div className="font-semibold mb-2">
+                      {t("games.dataDash.groupLabel", {
+                        group: valueLabel(inferRule, group.label),
+                        defaultValue: "Group {{group}}",
+                      })}
+                    </div>
                     <ul className="text-sm list-disc ml-4">
-                      {group.cards.map((card) => <li key={card.id}>{card.name}</li>)}
+                      {group.cards.map((card) => (
+                        <li key={card.id}>{plantName(card)}</li>
+                      ))}
                     </ul>
                   </div>
                 ))}
               </div>
               <div className="flex flex-wrap gap-2">
                 {inferOptions.map((option) => (
-                  <Button key={option} variant={inferChoice === option ? "default" : "outline"} onClick={() => setInferChoice(option)}>{option}</Button>
+                  <Button
+                    key={option}
+                    variant={inferChoice === option ? "default" : "outline"}
+                    onClick={() => setInferChoice(option)}
+                  >
+                    {attrLabel(option)}
+                  </Button>
                 ))}
-                <Button variant="secondary" onClick={() => setHintsUsed((v) => v + 1)}>Hint</Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => setHintsUsed((v) => v + 1)}
+                >
+                  {hintLabel}
+                </Button>
               </div>
-              <Button disabled={!inferChoice} onClick={() => setPhase("chart")}>Submit Phase B</Button>
+              <Button disabled={!inferChoice} onClick={() => setPhase("chart")}>
+                {t("games.dataDash.submitPhaseB", {
+                  defaultValue: "Submit Phase B",
+                })}
+              </Button>
             </>
           )}
 
           {phase === "chart" && (
             <>
-              <p className="text-sm text-slate-600">Chart from your Phase A sort ({SORT_RULES[rule].label}):</p>
+              <p className="text-sm text-slate-600">
+                {t("games.dataDash.chartIntro", {
+                  rule: ruleLabel,
+                  defaultValue: "Chart from your Phase A sort ({{rule}}):",
+                })}
+              </p>
               <div className="space-y-2">
                 {chartData.map((row) => (
                   <div key={row.label}>
-                    <div className="text-sm">{row.label}: {row.count}</div>
-                    <div className="h-3 bg-slate-100 rounded"><div className="h-3 bg-emerald-500 rounded" style={{ width: `${row.count * 20}%` }} /></div>
+                    <div className="text-sm">
+                      {t("games.dataDash.chartRow", {
+                        value: valueLabel(rule, row.label),
+                        count: row.count,
+                        defaultValue: "{{value}}: {{count}}",
+                      })}
+                    </div>
+                    <div className="h-3 bg-slate-100 rounded">
+                      <div
+                        className="h-3 bg-emerald-500 rounded"
+                        style={{ width: `${row.count * 20}%` }}
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
               {chartQuestions.map((q, i) => (
                 <div key={q.prompt} className="border rounded-lg p-3 space-y-2">
-                  <div className="font-medium">{q.prompt}</div>
+                  <div className="font-medium">
+                    {q.promptKey
+                      ? t(q.promptKey, {
+                          rule: ruleLabel,
+                          defaultValue: q.prompt,
+                        })
+                      : q.prompt}
+                  </div>
                   <div className="flex flex-col gap-2">
                     {q.choices.map((choice, idx) => (
-                      <Button key={choice} variant={chartAnswers[i] === idx ? "default" : "outline"} onClick={() => setChartAnswers((prev) => ({ ...prev, [i]: idx }))}>{choice}</Button>
+                      <Button
+                        key={choice}
+                        variant={
+                          chartAnswers[i] === idx ? "default" : "outline"
+                        }
+                        onClick={() =>
+                          setChartAnswers((prev) => ({ ...prev, [i]: idx }))
+                        }
+                      >
+                        {q.choiceKeys?.[idx]
+                          ? t(q.choiceKeys[idx], { defaultValue: choice })
+                          : choice}
+                      </Button>
                     ))}
                   </div>
                 </div>
               ))}
-              <Button variant="secondary" onClick={() => setHintsUsed((v) => v + 1)}>Hint</Button>
-              <Button onClick={finishGame} disabled={Object.keys(chartAnswers).length < chartQuestions.length}>Complete Mission</Button>
+              <Button
+                variant="secondary"
+                onClick={() => setHintsUsed((v) => v + 1)}
+              >
+                {hintLabel}
+              </Button>
+              <Button
+                onClick={finishGame}
+                disabled={
+                  Object.keys(chartAnswers).length < chartQuestions.length
+                }
+              >
+                {t("games.dataDash.completeMission", {
+                  defaultValue: "Complete Mission",
+                })}
+              </Button>
             </>
           )}
         </CardContent>
@@ -227,15 +507,62 @@ function DataDashPlayfield({
   );
 }
 
-export default function DataDashSortDiscoverGame({ config, onComplete, secondaryAction }: GameProps) {
+export default function DataDashSortDiscoverGame({
+  config,
+  onComplete,
+  secondaryAction,
+}: GameProps) {
+  const { t } = useTranslation();
   // Authored challenges arrive via config.challenge; otherwise fall back to the
   // original seeded challenge (resolveChallenge handles the default).
   const challenge = resolveChallenge(config);
+  const title = t("games.dataDash.title", {
+    defaultValue: "Data Dash: Sort & Discover",
+  });
+  const briefing: MissionBriefing = {
+    title,
+    story: t("games.dataDash.briefingStory", {
+      defaultValue:
+        "Your greenhouse team sent a data drop. Sort plant cards, infer hidden rules, and use chart evidence to support a claim.",
+    }),
+    icon: "📊",
+    tips: [
+      t("games.dataDash.tipOneAttribute", {
+        defaultValue: "Use one attribute per sort rule",
+      }),
+      t("games.dataDash.tipGroupShare", {
+        defaultValue: "Look for what all cards in a group share",
+      }),
+      t("games.dataDash.tipChartEvidence", {
+        defaultValue: "Use chart counts as evidence",
+      }),
+    ],
+    chapterLabel: t("games.dataDash.chapterLabel", {
+      defaultValue: "Life Science Data",
+    }),
+    themeColor: "emerald",
+    controlInstructions: {
+      keyboard: [
+        t("games.dataDash.controlsKeyboard", {
+          defaultValue:
+            "Use Tab to select a card, then choose a bin or answer with Enter or Space.",
+        }),
+      ],
+      buttons: [
+        t("games.dataDash.controlsSelect", {
+          defaultValue: "Select a card, then choose a bin or answer.",
+        }),
+        t("games.dataDash.controlsEvidence", {
+          defaultValue: "Use attributes as evidence.",
+        }),
+      ],
+    },
+  };
   return (
     <GameShell
       gameKey="data_dash_sort_discover"
-      title="Data Dash: Sort & Discover"
-      briefing={BRIEFING}
+      title={title}
+      briefing={briefing}
       onComplete={(result) => onComplete?.(result)}
       secondaryAction={secondaryAction}
     >
