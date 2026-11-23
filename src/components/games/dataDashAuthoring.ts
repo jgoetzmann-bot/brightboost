@@ -15,9 +15,18 @@ import {
   type SortRuleKey,
 } from "./DataDashSortDiscoverGame";
 
-type Attr = "sunlightNeed" | "waterNeed" | "leafType" | "seedType" | "growthSpeed";
+type Attr =
+  | "sunlightNeed"
+  | "waterNeed"
+  | "leafType"
+  | "seedType"
+  | "growthSpeed";
 
-export const SORT_RULE_KEYS: SortRuleKey[] = ["sunlightNeed", "waterNeed", "leafType"];
+export const SORT_RULE_KEYS: SortRuleKey[] = [
+  "sunlightNeed",
+  "waterNeed",
+  "leafType",
+];
 
 export const INFER_RULE_OPTIONS: Attr[] = [
   "sunlightNeed",
@@ -29,9 +38,11 @@ export const INFER_RULE_OPTIONS: Attr[] = [
 
 export const MIN_CARDS = 4;
 
-// Human labels for the attribute options. These are game-domain content (like
-// the English SORT_RULES in the game component, which is not yet i18n'd); the
-// authoring form's own chrome IS translated via t().
+// English labels for the attribute options. The game translates them through
+// games.dataDash.attributes.<attr> and uses these as the defaultValue (read at
+// render time only — see the import-cycle note on pool() below). The authoring
+// form's own chrome is translated via t(), but it still shows these English
+// labels and saves an English title built from SORT_RULES[].label.
 export const ATTR_LABELS: Record<string, string> = {
   sunlightNeed: "Sunlight need",
   waterNeed: "Water need",
@@ -47,7 +58,16 @@ export interface DataDashChallenge {
   inferRule: Attr;
 }
 
-export type ChartQuestion = { prompt: string; choices: string[]; answerIndex: number };
+// prompt/choices are the English text (also React keys and the t()
+// defaultValue). promptKey/choiceKeys, when set, are the games.dataDash.* keys
+// the playfield translates them through; choiceKeys follows choices' order.
+export type ChartQuestion = {
+  prompt: string;
+  choices: string[];
+  answerIndex: number;
+  promptKey?: string;
+  choiceKeys?: string[];
+};
 
 // Lazily built so this module can be imported before DataDashSortDiscoverGame
 // has finished evaluating. The two modules import from each other (the game
@@ -84,7 +104,9 @@ function partitionSignature(cards: DataCard[], attr: Attr): string {
     bucket.push(c.id);
     groups.set(c[attr], bucket);
   }
-  return JSON.stringify([...groups.values()].map((ids) => [...ids].sort()).sort());
+  return JSON.stringify(
+    [...groups.values()].map((ids) => [...ids].sort()).sort(),
+  );
 }
 
 export type ChallengeValidation = { ok: true } | { ok: false; error: string };
@@ -96,22 +118,37 @@ export function validateDataDashChallenge(
   if (!challenge || typeof challenge !== "object") {
     return { ok: false, error: "challenge must be an object" };
   }
-  if (challenge.v !== 1) return { ok: false, error: "unsupported challenge version" };
+  if (challenge.v !== 1)
+    return { ok: false, error: "unsupported challenge version" };
 
   const { cardIds, sortRule, inferRule } = challenge;
-  if (!Array.isArray(cardIds)) return { ok: false, error: "cardIds must be an array" };
-  if (cardIds.length < MIN_CARDS) return { ok: false, error: `pick at least ${MIN_CARDS} plants` };
-  if (new Set(cardIds).size !== cardIds.length) return { ok: false, error: "duplicate plant" };
-  if (cardIds.some((id) => !(id in pool()))) return { ok: false, error: "unknown plant" };
-  if (!sortRule || !SORT_RULE_KEYS.includes(sortRule)) return { ok: false, error: "invalid sort rule" };
-  if (!inferRule || !INFER_RULE_OPTIONS.includes(inferRule)) return { ok: false, error: "invalid hidden rule" };
+  if (!Array.isArray(cardIds))
+    return { ok: false, error: "cardIds must be an array" };
+  if (cardIds.length < MIN_CARDS)
+    return { ok: false, error: `pick at least ${MIN_CARDS} plants` };
+  if (new Set(cardIds).size !== cardIds.length)
+    return { ok: false, error: "duplicate plant" };
+  if (cardIds.some((id) => !(id in pool())))
+    return { ok: false, error: "unknown plant" };
+  if (!sortRule || !SORT_RULE_KEYS.includes(sortRule))
+    return { ok: false, error: "invalid sort rule" };
+  if (!inferRule || !INFER_RULE_OPTIONS.includes(inferRule))
+    return { ok: false, error: "invalid hidden rule" };
 
   const cards = cardIds.map((id) => pool()[id]);
 
   if (distinctValues(cards, sortRule as Attr) < 2)
-    return { ok: false, error: "all plants share the same sort value — pick a rule that splits them" };
+    return {
+      ok: false,
+      error:
+        "all plants share the same sort value — pick a rule that splits them",
+    };
   if (!hasUniqueMax(cards, sortRule as Attr))
-    return { ok: false, error: "the sort groups tie — the chart question would have no single answer" };
+    return {
+      ok: false,
+      error:
+        "the sort groups tie — the chart question would have no single answer",
+    };
   if (distinctValues(cards, inferRule) < 2)
     return { ok: false, error: "the hidden rule does not group these plants" };
 
@@ -119,13 +156,20 @@ export function validateDataDashChallenge(
   for (const other of INFER_RULE_OPTIONS) {
     if (other === inferRule) continue;
     if (partitionSignature(cards, other) === inferSig)
-      return { ok: false, error: "another attribute groups the plants the same way — pick a different hidden rule" };
+      return {
+        ok: false,
+        error:
+          "another attribute groups the plants the same way — pick a different hidden rule",
+      };
   }
   return { ok: true };
 }
 
 /** Derive the (templated, no free-text) chart question from the data. */
-export function buildDerivedChartQuestion(cards: DataCard[], sortRule: SortRuleKey): ChartQuestion {
+export function buildDerivedChartQuestion(
+  cards: DataCard[],
+  sortRule: SortRuleKey,
+): ChartQuestion {
   const values = SORT_RULES[sortRule].values;
   const counts = valueCounts(cards, sortRule as Attr);
   let answerIndex = 0;
@@ -141,6 +185,9 @@ export function buildDerivedChartQuestion(cards: DataCard[], sortRule: SortRuleK
     prompt: `Which "${SORT_RULES[sortRule].label}" group has the most plants?`,
     choices: values,
     answerIndex,
+    // The playfield fills {{rule}} with the translated attribute label.
+    promptKey: "games.dataDash.chart.mostPlantsPrompt",
+    choiceKeys: values.map((v) => `games.dataDash.values.${sortRule}.${v}`),
   };
 }
 
@@ -162,16 +209,36 @@ function defaultResolved(): ResolvedChallenge {
     inferRule: "seedType",
     inferOptions: ["sunlightNeed", "waterNeed", "seedType", "growthSpeed"],
     chartQuestions: [
-    {
-      prompt: "Which claim is best supported by the chart?",
-      choices: ["Most plants need full sunlight.", "Most plants need shade.", "All plants need partial sunlight."],
-      answerIndex: 0,
-    },
-    {
-      prompt: "What evidence best supports your claim?",
-      choices: ["The full-sun bar is tallest.", "Fern has frond leaves.", "Plant bed A has three cards."],
-      answerIndex: 0,
-    },
+      {
+        prompt: "Which claim is best supported by the chart?",
+        choices: [
+          "Most plants need full sunlight.",
+          "Most plants need shade.",
+          "All plants need partial sunlight.",
+        ],
+        answerIndex: 0,
+        promptKey: "games.dataDash.chart.claimPrompt",
+        choiceKeys: [
+          "games.dataDash.chart.claimFullSun",
+          "games.dataDash.chart.claimShade",
+          "games.dataDash.chart.claimPartialSun",
+        ],
+      },
+      {
+        prompt: "What evidence best supports your claim?",
+        choices: [
+          "The full-sun bar is tallest.",
+          "Fern has frond leaves.",
+          "Plant bed A has three cards.",
+        ],
+        answerIndex: 0,
+        promptKey: "games.dataDash.chart.evidencePrompt",
+        choiceKeys: [
+          "games.dataDash.chart.evidenceFullSunBar",
+          "games.dataDash.chart.evidenceFernFronds",
+          "games.dataDash.chart.evidenceBedA",
+        ],
+      },
     ],
   };
 }
